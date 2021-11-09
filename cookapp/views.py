@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect 
 from .models import *
 from rest_framework import viewsets, permissions, generics
 from rest_framework.response import Response
@@ -7,35 +7,84 @@ from knox.models import AuthToken
 from .serializers import *
 from rest_framework import permissions
 from rest_framework.views import APIView
-from django.shortcuts import get_object_or_404
-from rest_framework.renderers import TemplateHTMLRenderer
-
+from .forms import CreateUserForm
+from .decorators import unauthenticated_user, allowed_users
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth import authenticate, login, logout
+from django.contrib import messages
+from django.contrib.auth.forms import PasswordChangeForm
+from django.contrib.auth import update_session_auth_hash
 # Create your views here.
 
-class LoginAPI(generics.GenericAPIView):
-    serializer_class = LoginSerializer
+@unauthenticated_user
+def registerPage(request):
+	form = CreateUserForm()
+	if request.method == 'POST':
+		form = CreateUserForm(request.POST)
+		if form.is_valid():
+			user = form.save()
+			username = form.cleaned_data.get('username')
+			messages.success(request, 'Account was created for ' + username)
 
-    def post(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        if serializer.is_valid(raise_exception=True):
-            user = serializer.validated_data
-            return Response({
-                "user": UserSerializer(user, context=self.get_serializer_context()).data,
-                "token": AuthToken.objects.create(user)[1],
-            })
-        else:
-            return Response(serializer.errors, status=status.HTTP_401_UNAUTHORIZED)
+			return redirect('login')
+		
 
-class PasswordAPI(generics.GenericAPIView):
-    permission_classes = [
-        permissions.IsAuthenticated
-    ]
-    model = User
+	context = {'form':form}
+	return render(request, 'register.html', context)
 
-    def post(self, request):
-        user = request.user
-        if not user.check_password(request.data.get('password')):
-            return Response({'message': "Incorrect Password"}, status=status.HTTP_400_BAD_REQUEST)
-        else:
-            return Response({'message': "Success"}, status=status.HTTP_200_OK)
+@unauthenticated_user
+def loginPage(request):
 
+	if request.method == 'POST':
+		username = request.POST.get('username')
+		password =request.POST.get('password')
+
+		user = authenticate(request, username=username, password=password)
+
+		if user is not None:
+			login(request, user)
+			return redirect('home')
+		else:
+			messages.info(request, 'Username OR password is incorrect')
+
+	context = {}
+	return render(request, 'login.html', context)
+
+def logoutUser(request):
+	logout(request)
+	return redirect('login')
+
+# @login_required(login_url='login')
+# @unauthenticated_user
+def home(request):
+    
+    varified  = False
+    # print(request.user.is_authenticated)
+    if request.user.is_authenticated:
+        varified=True
+        print(request.user)
+    context = {
+        "varified": varified
+    }
+    return render(request, 'home.html', context)
+
+def ResetPasswordView(request):
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        try:
+            user = User.objects.get(username=username)
+            form = PasswordChangeForm(user, request.POST)
+            if form.is_valid():
+                user = form.save()
+                update_session_auth_hash(request, user)  # Important!
+                messages.success(
+                    request, 'Your password was successfully updated!')
+                return redirect('login')
+            else:
+                messages.error(request, 'Please provide correct information.')
+                return render(request, 'password_reset.html', {'form': form })
+        except:
+            messages.error(request, 'User does not exists')
+    
+    form = PasswordChangeForm(request.user)
+    return render(request, 'password_reset.html', {'form': form })

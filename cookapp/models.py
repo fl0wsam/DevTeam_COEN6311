@@ -35,7 +35,7 @@ class Recipe(models.Model):
     ingrediants = models.CharField(max_length=255, blank=True, null=True)
     direction = models.CharField(max_length=255, blank=True, null=True)
     upload_time = models.DateTimeField()
-    cook_duration = models.IntegerField()
+    cook_duration = models.IntegerField(default=0)
     photo = models.ImageField(null=True, blank=True,
                               upload_to="RecipePhotos")
     def __str__(self):
@@ -43,4 +43,5 @@ class Recipe(models.Model):
     link = models.CharField(max_length=255, blank=True, null=True)
     
 class Rate(models.Model):
+    recipe = models.ForeignKey(Recipe,null=True, blank=True, on_delete=models.CASCADE)
     rate = models.IntegerField(null=True, blank=True)

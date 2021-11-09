@@ -1,13 +1,20 @@
-from .views import *
 from knox import views as knox_views
 from django.urls import path
-
-app_name = 'crm_app'
+from django.contrib.auth import views as auth_views
+from . import views
 
 urlpatterns = [
-    path('login/', LoginAPI.as_view(),
-         name="login"),
-    # # SEARCH APIS
-    # path('search/<slug:type>/', SearchAPI.as_view(),
-    #      name="search"),
+    # home
+    path('', views.home, name="home"),
+    # signup
+    path('register/', views.registerPage, name="register"),
+	# login
+    path('login/', views.loginPage, name="login"),  
+	# logout
+    path('logout/', views.logoutUser, name="logout"),
+    # forgot password
+    path('reset_password/',
+        views.ResetPasswordView, name="reset_password"),
+
+    
 ]

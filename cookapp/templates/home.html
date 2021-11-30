@@ -1,45 +1,122 @@
-<!DOCTYPE html>
-<html>
-<title>CookWise</title>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
-<style>
-body {font-family: "Times New Roman", Georgia, Serif;}
-h1, h2, h3, h4, h5, h6 {
-  font-family: "Playfair Display";
-  letter-spacing: 5px;
-}
-</style>
-<body>
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
 
-<!-- Navbar (sit on top) -->
-<div class="w3-top">
-  <div class="w3-bar w3-white w3-padding w3-card" style="letter-spacing:4px;">
-    <a href="#home" class="w3-bar-item w3-button">CookWise</a>
-    <!-- Right-sided navbar links. Hide them on small screens -->
-    <div class="w3-right w3-hide-small">
-        {% if not varified %}
-      <a href="{% url 'login' %}" class="w3-bar-item w3-button">Login</a>
-      {%else%}
-      <a href="{% url 'logout' %}" class="w3-bar-item w3-button">Logout</a>
+{% if request.user.is_company%}
+        <br/>
+        {% if list_of_ingrediants %}
+        <h3>List of ingrediants according to search count</h3>
+        <ul>
+        {% for ing in list_of_ingrediants %}
+            <li><h4>{{ ing.name }} :: count: {{ ing.count }}</h4></li>
+        {% endfor %}
+        </ul>
+        {% endif %}
+        
+        <br/>
+        <br/>
+<form method="POST" action="{% url 'search_ingredients' %}" class="form">
+          {% csrf_token %}
+          <div >
+            <select name="score" id="score">
+              <option disabled selected value> 
+              <option value=1>1 star & up</option>
+              <option value=2>2 star & up</option>
+              <option value=3>3 star & up</option>
+              <option value=4>4 star & up</option>
+              <option value=5>5 star & up</option>
+            </select>        
+        </div>
+        <!-- <input type="submit" value="Filter Recipe"> -->
+          <input type="submit" value="Search">
+      </form>
+      <br/>
+      <br/>
+      {% if searched_filter_score %}
+      <h4>Rating: {% for o in searched_filter_score %} {{o}}{% endfor %}</h4>
       {% endif %}
-      <!-- <a href="#menu" class="w3-bar-item w3-button">Menu</a>
-      <a href="#contact" class="w3-bar-item w3-button">Contact</a> -->
-    </div>
-  </div>
-</div>
+      <br/>
+      {% if list_of_recipes %}  
+      <h3>List of recipes according to their rating</h3>
 
+      <ul>
+      {% for recipe in list_of_recipes %}
+          <li><h4><a href="{% url 'recipes_detail' recipe.id %}">{{ recipe.name }}</a></h4></li>
+      {% endfor %}
+      </ul>
+      {% endif %}
+{% else %}
+<a href="{% url 'recipe_create' %}">Upload Recipe</a>
+<br/>
+Search any recipe by providing your ingredients....
+        <br/> <br/> <br/>
+        <form method="POST" action="{% url 'search_ingredients' %}" class="form">
+          {% csrf_token %}
+          <div >
+            <div class="ingredients">
+              <input required name="name" id="id" type="text" value="">
+              <a class="extra-fields-ingredients" href="#">Add More Ingredients</a>
+            </div>          
+            <div class="ingredients_dynamic"></div>
+          
+          </div>
 
-<!-- Page content -->
-<div class="w3-content" style="max-width:1100px">
-    <div class="w3-content" style="max-width:1100px;margin: 70px;">
-        Search any recipe by providing your ingredients....
-    </div>
-<!-- End page content -->
-</div>
+          <div >
+            <select name="score" id="score">
+              <option disabled selected value> 
+              <option value=1>1 star & up</option>
+              <option value=2>2 star & up</option>
+              <option value=3>3 star & up</option>
+              <option value=4>4 star & up</option>
+              <option value=5>5 star & up</option>
+            </select>        
+        </div>
+        <!-- <input type="submit" value="Filter Recipe"> -->
+          <input type="submit" value="Search">
+      </form>
+      <br/>
+      <br/>
+      {% if searched_ingrediants %}
+      <h4>Ingrediants: {% for o in searched_ingrediants %} {{o}}{% endfor %}</h4>
+      {% endif %}
+      <br/>
+      {% if searched_filter_score %}
+      <h4>Rating: {% for o in searched_filter_score %} {{o}}{% endfor %}</h4>
+      {% endif %}
+      <br/>
+      {% if list_of_recipes %}  
+      <ul>
+      {% for recipe in list_of_recipes %}
+          <li><h4><a href="{% url 'recipes_detail' recipe.id %}">{{ recipe.name }}</a></h4></li>
+      {% endfor %}
+      </ul>
+      {% endif %}
+{% endif %}
+        
+{% endblock %}
+{% block external_js %}
+<script type="text/javascript">
+  $('.extra-fields-ingredients').click(function() {
+  $('.ingredients').clone().appendTo('.ingredients_dynamic');
+  $('.ingredients_dynamic .ingredients').addClass('single remove');
+  $('.ingredients_dynamic .ingredients input').val("")
 
+  $('.single .extra-fields-ingredients').remove();
+  $('.single').append('<a href="#" class="remove-field btn-remove-customer">Remove</a>');
+  $('.ingredients_dynamic > .single').attr("class", "remove");
 
+  $('.ingredients_dynamic input').each(function() {
+    var count = 0;
+    var fieldname = $(this).attr("name");
+    count++;
+  });
 
-</body>
+});
+
+$(document).on('click', '.remove-field', function(e) {
+  $(this).parent('.remove').remove();
+  e.preventDefault();
+});
+</script>
+{% endblock %}
 </html>

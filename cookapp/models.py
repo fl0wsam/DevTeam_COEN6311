@@ -4,6 +4,7 @@ from django.contrib.auth.models import AbstractBaseUser
 from django.contrib.auth.models import PermissionsMixin
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth.models import UserManager
+from django.core.validators import MaxValueValidator, MinValueValidator
 # Create your models here.
 
 
@@ -61,7 +62,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
 class Ingrediants(models.Model):
     name = models.CharField(max_length=255, blank=True, null=True)
-    count = models.IntegerField(null=True, blank=True)
+    count = models.IntegerField(default=0, null=True, blank=True)
 
     def __str__(self):
         return self.name
@@ -74,10 +75,18 @@ class Recipe(models.Model):
     cook_duration = models.IntegerField(default=0)
     photo = models.ImageField(null=True, blank=True,
                               upload_to="RecipePhotos")
+    total_score = models.IntegerField(default=0)
+    score = models.IntegerField(default=0,
+        validators=[
+            MaxValueValidator(5),
+            MinValueValidator(0),
+        ]
+    )
+
     def __str__(self):
         return self.name
     link = models.CharField(max_length=255, blank=True, null=True)
-    
-class Rate(models.Model):
-    recipe = models.ForeignKey(Recipe,null=True, blank=True, on_delete=models.CASCADE)
-    rate = models.IntegerField(null=True, blank=True)
+
+
+    def __str__(self):
+        return str(self.pk)

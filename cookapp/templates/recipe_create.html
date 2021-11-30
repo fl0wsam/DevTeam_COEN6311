@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+
+
+<h1>Create Recipe</h1>
+<form method="POST" class="form">
+    {% csrf_token %}
+    <input type="text" id="name" name="name" placeholder="Recipe Name"  /><br />
+    <textarea id="ingrediants" name="ingrediants" rows="5" cols="50" placeholder="Ingredience..."></textarea><br />
+    <textarea id="direction" name="direction" rows="10" cols="50" placeholder="Direction..."></textarea><br />
+    <input type="number" id="cook_duration" name="cook_duration" placeholder="Cook time (Minutes)"  /><br />
+    <input type="submit" value="Create">
+</form>
+{% endblock %}

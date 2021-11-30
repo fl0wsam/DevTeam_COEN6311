@@ -16,5 +16,11 @@ urlpatterns = [
     path('reset_password/',
         views.ResetPasswordView, name="reset_password"),
 
+    path('rate_recipe/', views.rate_recipe, name='rate_recipe'),
+    
+    path('recipe_create/',views.recipe_create,name='recipe_create'),
+    path('recipes_detail/<int:recipe_id>/',views.recipes_detail,name='recipes_detail'),
+    
+    path('search_ingredients/',views.search_ingredients,name='search_ingredients'),
     
 ]

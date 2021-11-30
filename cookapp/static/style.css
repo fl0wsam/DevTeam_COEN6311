@@ -1,0 +1,10 @@
+.starclass {
+  color: gray;
+  border: none;
+  background: none;
+}
+.starchecked {
+  color: #fbaa31 !important;
+  border: none;
+  background: none;
+}

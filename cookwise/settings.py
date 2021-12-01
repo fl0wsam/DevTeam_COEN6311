@@ -131,3 +131,5 @@ STATIC_URL = '/static/'
 
 # AUTH USER
 AUTH_USER_MODEL = 'cookapp.User'
+
+STATIC_ROOT = 'static/'

@@ -14,4 +14,8 @@ class RecipeForm(forms.ModelForm):
 
     class Meta:
         model = Recipe
-        fields =['name', 'ingrediants', 'direction', 'cook_duration']
+        fields =['name', 'ingrediants', 'direction','upload_by', 'cook_duration','photo','link']
+    def __init__(self, *args, **kwargs):
+        super(RecipeForm, self).__init__(*args, **kwargs)
+        self.fields['photo'].required = False
+        self.fields['link'].required = False

@@ -4,12 +4,15 @@
 
 
 <h1>Create Recipe</h1>
-<form method="POST" class="form">
+<form method="POST" class="form" enctype="multipart/form-data">
     {% csrf_token %}
-    <input type="text" id="name" name="name" placeholder="Recipe Name"  /><br />
-    <textarea id="ingrediants" name="ingrediants" rows="5" cols="50" placeholder="Ingredience..."></textarea><br />
-    <textarea id="direction" name="direction" rows="10" cols="50" placeholder="Direction..."></textarea><br />
-    <input type="number" id="cook_duration" name="cook_duration" placeholder="Cook time (Minutes)"  /><br />
+    <input required type="text" id="name" name="name" placeholder="Recipe Name" maxlength=255  /><br />
+    <textarea required id="ingrediants" name="ingrediants" rows="5" cols="50" maxlength=10000 placeholder="Ingredience..."></textarea><br />
+    <textarea required id="direction" name="direction" rows="10" cols="50" maxlength=10000 placeholder="Direction..."></textarea><br />
+    <input required type="number" id="cook_duration" name="cook_duration" placeholder="Cook time (Minutes)"  /><br />
+    <input type="file" id="photo" name="photo" > <br/>
+    <input type="text" id="link" name="link" placeholder="link" maxlength=10000  /><br />
+    <input required type="text" name="upload_by" value={{request.user.id}} hidden>
     <input type="submit" value="Create">
 </form>
 {% endblock %}

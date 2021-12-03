@@ -7,16 +7,20 @@
           <div >
               <form class="rate-form" action="" method="POST" id="{{recipe.id}}">
                   {% csrf_token %}
-                  <button type="submit" class="fa fa-star fa-2x my-btn  {% if mscore > 0 %}starchecked{% else %}starclass{% endif %}" id="first"></button>
-                  <button type="submit" class="fa fa-star fa-2x my-btn  {% if mscore > 1 %}starchecked{% else %}starclass{% endif %}" id="second"></button>
-                  <button type="submit" class="fa fa-star fa-2x my-btn  {% if mscore > 2 %}starchecked{% else %}starclass{% endif %}" id="third"></button>
-                  <button type="submit" class="fa fa-star fa-2x my-btn  {% if mscore > 3 %}starchecked{% else %}starclass{% endif %}" id="fourth"></button>
-                  <button type="submit" class="fa fa-star fa-2x my-btn  {% if mscore > 4 %}starchecked{% else %}starclass{% endif %}" id="fifth"></button>
+                  <button  {% if request.user == recipe.upload_by %} disabled {%endif%} type="submit" class="fa fa-star fa-2x my-btn  {% if recipe.mscore > 0 %}starchecked{% else %}starclass{% endif %}" id="first"></button>
+                  <button {% if request.user == recipe.upload_by %} disabled {%endif%} type="submit" class="fa fa-star fa-2x my-btn  {% if recipe.mscore > 1 %}starchecked{% else %}starclass{% endif %}" id="second"></button>
+                  <button {% if request.user == recipe.upload_by %} disabled {%endif%} type="submit" class="fa fa-star fa-2x my-btn  {% if recipe.mscore > 2 %}starchecked{% else %}starclass{% endif %}" id="third"></button>
+                  <button {% if request.user == recipe.upload_by %} disabled {%endif%} type="submit" class="fa fa-star fa-2x my-btn  {% if recipe.mscore > 3 %}starchecked{% else %}starclass{% endif %}" id="fourth"></button>
+                  <button {% if request.user == recipe.upload_by %} disabled {%endif%} type="submit" class="fa fa-star fa-2x my-btn  {% if recipe.mscore > 4 %}starchecked{% else %}starclass{% endif %}" id="fifth"></button>
               </form>
-              <p style="margin-left: 8px;">({{ mscore}}/5)</p>
+              <!-- <p style="margin-left: 8px;">({{ mscore}}/5)</p> -->
           </div>
       </div>  
       <br/>
+      {%if recipe.photo%}
+          <img style="width: 250px;
+          height: 200px;     margin-bottom: 37px;" src="{{ recipe.photo.url }}" />
+         {%endif%} 
       <br/>
     <h4> Ingrediants: </h4>
     <p> {{ recipe.ingrediants }}</p>
@@ -31,6 +35,11 @@
     <h4>Cook Duration (Minutes): </h4>
     <p> {{recipe.cook_duration}} </p>
     <br />
+    {%if recipe.link%}
+    <h4>Recipe Link: </h4>
+
+    <a href={{recipe.link}}>{{recipe.link}}</a>
+    {%endif%}
     {% endblock %}
 
 

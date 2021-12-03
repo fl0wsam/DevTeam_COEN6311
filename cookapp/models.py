@@ -2,9 +2,8 @@ from django.db import models
 from django.contrib.auth.base_user import BaseUserManager
 from django.contrib.auth.models import AbstractBaseUser
 from django.contrib.auth.models import PermissionsMixin
+from django.db.models.deletion import CASCADE
 from django.utils.translation import ugettext_lazy as _
-from django.contrib.auth.models import UserManager
-from django.core.validators import MaxValueValidator, MinValueValidator
 # Create your models here.
 
 
@@ -69,19 +68,16 @@ class Ingrediants(models.Model):
 
 class Recipe(models.Model):
     name = models.CharField(max_length=255, blank=True, null=True)
-    ingrediants = models.CharField(max_length=255, blank=True, null=True)
-    direction = models.CharField(max_length=255, blank=True, null=True)
+    upload_by = models.ForeignKey('cookapp.user',  on_delete=models.CASCADE)
+    ingrediants = models.CharField(max_length=10000, blank=True, null=True)
+    direction = models.CharField(max_length=10000, blank=True, null=True)
     upload_time = models.DateTimeField()
     cook_duration = models.IntegerField(default=0)
-    photo = models.ImageField(null=True, blank=True,
-                              upload_to="RecipePhotos")
+    photo = models.ImageField(null=True, blank=True)
+    link=models.CharField(max_length=10000, blank=True, null=True)
     total_score = models.IntegerField(default=0)
-    score = models.IntegerField(default=0,
-        validators=[
-            MaxValueValidator(5),
-            MinValueValidator(0),
-        ]
-    )
+    score = models.IntegerField(default=0)
+    mscore = models.FloatField(default=0)
 
     def __str__(self):
         return self.name

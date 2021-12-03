@@ -46,7 +46,7 @@ def logoutUser(request):
 
 def home(request):    
     if request.user.is_authenticated and request.user.is_company:
-        recipe = Recipe.objects.order_by('-score')
+        recipe = Recipe.objects.order_by('-mscore')
         ingrediants=Ingrediants.objects.all().order_by('-count')
         # ing = Ingrediants.objects.all().aggregate(Max('count'))
 
@@ -89,13 +89,13 @@ def rate_recipe(request):
         recipe = Recipe.objects.get(id=el_id)
         recipe.total_score=int(recipe.total_score)+1
         recipe.score = (int(recipe.score)+int(val))
-        recipe.save()
         mscore=0
         if recipe.total_score>0:
             mscore =round(recipe.score/recipe.total_score,2)
+            recipe.mscore=mscore
+        recipe.save()
         context ={
-            'recipe':recipe,
-            'mscore':mscore
+            'recipe':recipe
         }
         return render(request, 'recipes_detail.html', context)
     return render(request, 'recipes_detail.html', {})
@@ -104,32 +104,30 @@ def rate_recipe(request):
 @login_required(login_url='login')
 def recipe_create(request):
     if request.method == "POST":
-        form = RecipeForm(request.POST)
+        form = RecipeForm(request.POST,request.FILES)
         if form.is_valid():
-            recipe = form.save(commit=False)
+            recipe = form.save(commit=False)            
             recipe.upload_time = timezone.now()
             recipe.save()
             return redirect('recipes_detail', recipe.id)
         else:
+            print(form.errors)
             return redirect('recipe_create')
     return render(request, 'recipe_create.html', {})
 
 @login_required(login_url='login')
 def recipes_detail(request, recipe_id):
     recipe = get_object_or_404(Recipe, pk=recipe_id)    
-    mscore=0
-    if recipe.total_score>0:
-        mscore = round(recipe.score/recipe.total_score,2)
-    return render(request, 'recipes_detail.html', {'recipe': recipe, 'mscore':mscore})
+    return render(request, 'recipes_detail.html', {'recipe': recipe})
 
 def search_ingredients(request):
     if request.method == "POST":
         filter_score = request.POST.get('score')
         if request.user.is_authenticated and request.user.is_company:
             if filter_score:
-                recipe = Recipe.objects.filter(score__gte=filter_score).order_by('-score')
+                recipe = Recipe.objects.filter(mscore__gte=filter_score).order_by('-mscore')
             else:
-                recipe = Recipe.objects.all().order_by('-score')
+                recipe = Recipe.objects.all().order_by('-mscore')
             context = {
                 'list_of_recipes': recipe,
                 'searched_filter_score':filter_score
@@ -140,9 +138,9 @@ def search_ingredients(request):
             recipe = None
             if len(ingrediants)>0:
                 ingrediants = list(dict.fromkeys(ingrediants)) # remove duplicate
-                recipe= Recipe.objects.filter(reduce(operator.and_, (Q(ingrediants__contains=x) for x in ingrediants))).order_by('-upload_time')
+                recipe= Recipe.objects.filter(reduce(operator.and_, (Q(ingrediants__contains=x) for x in ingrediants))).order_by('-mscore')
                 if filter_score:
-                    recipe=recipe.filter(score__gte=filter_score)
+                    recipe=recipe.filter(mscore__gte=filter_score)
                     # score ingrediants
                     # match_ing= Ingrediants.objects.filter(reduce(operator.or_, (Q(name__iexact=x) for x in ingrediants)))
                     for ing in ingrediants:
@@ -153,6 +151,7 @@ def search_ingredients(request):
                         else:
                             new = Ingrediants(name=ing,count=1)
                             new.save()
+                            
             
             context = {
                 'list_of_recipes': recipe,
@@ -161,4 +160,3 @@ def search_ingredients(request):
             }
         return render(request, 'home.html', context)
     return render(request, 'home.html', {})
-    
